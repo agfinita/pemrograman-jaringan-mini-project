@@ -1,289 +1,137 @@
 package aplikasi_notes;
 
 import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
+import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.StyledEditorKit;
-import javax.swing.text.TextAction;
+import java.awt.*;
 
 public class NotesAppGUI extends JFrame {
 
-    private JTextArea notesTextArea;
-    private List<String> notes;
+    private JTextPane notesTextPane;
+    private JMenuItem openMenuItem;
+    private JMenuItem saveMenuItem;
+    private JMenuItem fileInfoMenuItem;
+    private JMenuItem highlightMenuItem;
+    private JMenuItem colorBackgroundMenuItem;
+    private JMenuItem screenshotMenuItem;
+    private JMenuItem goToLineMenuItem;
 
     public NotesAppGUI() {
-        setTitle("Notes App");
-        setSize(400, 300);
+        setTitle("Simple Notes App");
+        setSize(600, 400);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-        JPanel titlePanel = new JPanel();
-        JLabel titleLabel = new JLabel("Simple NotesApp");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        titlePanel.add(titleLabel);
+        notesTextPane = new JTextPane();
+        JScrollPane scrollPane = new JScrollPane(notesTextPane);
+        getContentPane().add(scrollPane, BorderLayout.CENTER);
 
-        notesTextArea = new JTextArea();
-        notesTextArea.setLineWrap(true);
-        notesTextArea.setWrapStyleWord(true);
+        JMenuBar menuBar = new JMenuBar();
 
-        JButton newButton = new JButton("Tambah Note");
-        newButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                newNote();
-            }
-        });
+        JMenu fileMenu = new JMenu("File");
+        openMenuItem = new JMenuItem("Open");
+        fileMenu.add(openMenuItem);
 
-        JButton openButton = new JButton("Buka Note");
-        openButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                openNote();
-            }
-        });
+        saveMenuItem = new JMenuItem("Save");
+        fileMenu.add(saveMenuItem);
 
-        JButton saveButton = new JButton("Simpan Note");
-        saveButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                saveNote();
-            }
-        });
+        menuBar.add(fileMenu);
 
-        JButton editButton = new JButton("Edit Note");
-        editButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                editNote();
-            }
-        });
+        JMenu editMenu = new JMenu("Edit");
+        JMenuItem cutMenuItem = new JMenuItem(new DefaultEditorKit.CutAction());
+        cutMenuItem.setText("Cut");
+        editMenu.add(cutMenuItem);
 
-        JButton deleteButton = new JButton("Hapus Note");
-        deleteButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                deleteNote();
-            }
-        });
+        JMenuItem copyMenuItem = new JMenuItem(new DefaultEditorKit.CopyAction());
+        copyMenuItem.setText("Copy");
+        editMenu.add(copyMenuItem);
 
-        //format text
-        JButton cutButton = new JButton("Cut");
-        cutButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                notesTextArea.cut();
-            }
-        });
+        JMenuItem pasteMenuItem = new JMenuItem(new DefaultEditorKit.PasteAction());
+        pasteMenuItem.setText("Paste");
+        editMenu.add(pasteMenuItem);
 
-        JButton copyButton = new JButton("Copy");
-        copyButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                notesTextArea.copy();
-            }
-        });
+        menuBar.add(editMenu);
 
-        JButton pasteButton = new JButton("Paste");
-        pasteButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                notesTextArea.paste();
-            }
-        });
+        JMenu formatMenu = new JMenu("Format");
+        JMenuItem boldMenuItem = new JMenuItem(new StyledEditorKit.BoldAction());
+        boldMenuItem.setText("Bold");
+        formatMenu.add(boldMenuItem);
 
-        JButton boldButton = new JButton("Bold");
-        boldButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                StyledEditorKit.BoldAction boldAction = new StyledEditorKit.BoldAction();
-                boldAction.actionPerformed(e);
-            }
-        });
+        JMenuItem underlineMenuItem = new JMenuItem(new StyledEditorKit.UnderlineAction());
+        underlineMenuItem.setText("Underline");
+        formatMenu.add(underlineMenuItem);
 
-        JButton underlineButton = new JButton("Underline");
-        underlineButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                StyledEditorKit.UnderlineAction underlineAction = new StyledEditorKit.UnderlineAction();
-                underlineAction.actionPerformed(e);
-            }
-        });
+        JMenuItem italicMenuItem = new JMenuItem(new StyledEditorKit.ItalicAction());
+        italicMenuItem.setText("Italic");
+        formatMenu.add(italicMenuItem);
 
-        JButton italicButton = new JButton("Italic");
-        italicButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                StyledEditorKit.ItalicAction italicAction = new StyledEditorKit.ItalicAction();
-                italicAction.actionPerformed(e);
-            }
-        });
+        highlightMenuItem = new JMenuItem("Highlight");
+        formatMenu.add(highlightMenuItem);
 
-        //format text
-        JPanel formatButtonPanel = new JPanel();
-        formatButtonPanel.add(cutButton);
-        formatButtonPanel.add(copyButton);
-        formatButtonPanel.add(pasteButton);
-        formatButtonPanel.add(boldButton);
-        formatButtonPanel.add(underlineButton);
-        formatButtonPanel.add(italicButton);
+        colorBackgroundMenuItem = new JMenuItem("Color Background");
+        formatMenu.add(colorBackgroundMenuItem);
 
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new FlowLayout());
-        buttonPanel.add(newButton);
-        buttonPanel.add(openButton);
-        buttonPanel.add(saveButton);
-        buttonPanel.add(editButton);
-        buttonPanel.add(deleteButton);
-        // Tambahkan tombol-tombol ke panel buttonPanel
-        buttonPanel.add(newButton);
-        buttonPanel.add(openButton);
-        buttonPanel.add(saveButton);
-        buttonPanel.add(editButton);
-        buttonPanel.add(deleteButton);
-        buttonPanel.add(cutButton);
-        buttonPanel.add(copyButton);
-        buttonPanel.add(pasteButton);
-        buttonPanel.add(boldButton);
-        buttonPanel.add(underlineButton);
-        buttonPanel.add(italicButton);
+        menuBar.add(formatMenu);
 
-        //otomatisasi posisi
-        // Mengatur layout panel buttonPanel menggunakan GridBagLayout
-        buttonPanel.setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5); // Membuat jarak antara komponen
+        JMenu infoMenu = new JMenu("Info");
+        fileInfoMenuItem = new JMenuItem("File Info");
+        infoMenu.add(fileInfoMenuItem);
+        menuBar.add(infoMenu);
 
-        // Menambahkan tombol-tombol ke panel buttonPanel dengan mengatur gridx dan gridy
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        buttonPanel.add(newButton, gbc);
+        setJMenuBar(menuBar);
 
-        gbc.gridx = 1;
-        buttonPanel.add(openButton, gbc);
+        // Tambah Screenshot menu item
+        screenshotMenuItem = new JMenuItem("Screenshot");
+        menuBar.add(screenshotMenuItem);
 
-        gbc.gridx = 2;
-        buttonPanel.add(saveButton, gbc);
+        // Tambah Go to Line menu item
+        goToLineMenuItem = new JMenuItem("Go to Line");
+        menuBar.add(goToLineMenuItem);
 
-        gbc.gridx = 3;
-        buttonPanel.add(editButton, gbc);
+        setJMenuBar(menuBar);
 
-        gbc.gridx = 4;
-        buttonPanel.add(deleteButton, gbc);
+        // Inisialisasi NotesAppSource
+        NotesAppSource source = new NotesAppSource(this);
 
-        gbc.gridy = 1; // Pindah ke baris kedua
-        gbc.gridx = 0;
-        buttonPanel.add(cutButton, gbc);
-
-        gbc.gridx = 1;
-        buttonPanel.add(copyButton, gbc);
-
-        gbc.gridx = 2;
-        buttonPanel.add(pasteButton, gbc);
-
-        gbc.gridx = 3;
-        buttonPanel.add(boldButton, gbc);
-
-        gbc.gridx = 4;
-        buttonPanel.add(underlineButton, gbc);
-
-        gbc.gridx = 5;
-        buttonPanel.add(italicButton, gbc);
-
-        JScrollPane scrollPane = new JScrollPane(notesTextArea);
-        //panel format text
-        buttonPanel.add(formatButtonPanel);
-
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
-        panel.add(titlePanel, BorderLayout.NORTH);
-        panel.add(scrollPane, BorderLayout.CENTER);
-        panel.add(buttonPanel, BorderLayout.SOUTH);
-
-        add(panel);
-
-        notes = new ArrayList<>();
+        // Set visible
+        setVisible(true);
     }
 
-    private void newNote() {
-        notesTextArea.setText("");
+    public JTextPane getNotesTextPane() {
+        return notesTextPane;
     }
 
-    private void openNote() {
-        JFileChooser fileChooser = new JFileChooser();
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("Text Files", "txt");
-        fileChooser.setFileFilter(filter);
-        int result = fileChooser.showOpenDialog(this);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            File file = fileChooser.getSelectedFile();
-            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line).append("\n");
-                }
-                notesTextArea.setText(sb.toString());
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(this, "Failed to open file: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        }
+    public JMenuItem getOpenMenuItem() {
+        return openMenuItem;
     }
 
-    private void saveNote() {
-        JFileChooser fileChooser = new JFileChooser();
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("Text Files", "txt");
-        fileChooser.setFileFilter(filter);
-        int result = fileChooser.showSaveDialog(this);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            File file = fileChooser.getSelectedFile();
-            try (PrintWriter writer = new PrintWriter(new FileWriter(file))) {
-                writer.print(notesTextArea.getText());
-                writer.flush();
-                JOptionPane.showMessageDialog(this, "Note saved successfully.");
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(this, "Failed to save note: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        }
+    public JMenuItem getSaveMenuItem() {
+        return saveMenuItem;
     }
 
-    private void editNote() {
-        String editedNote = JOptionPane.showInputDialog(this, "Edit Note:", notesTextArea.getText());
-        if (editedNote != null && !editedNote.isEmpty()) {
-            notesTextArea.setText(editedNote);
-        }
+    public JMenuItem getFileInfoMenuItem() {
+        return fileInfoMenuItem;
     }
 
-    private void deleteNote() {
-        int result = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this note?", "Confirmation", JOptionPane.YES_NO_OPTION);
-        if (result == JOptionPane.YES_OPTION) {
-            notesTextArea.setText("");
-        }
+    public JMenuItem getHighlightMenuItem() {
+        return highlightMenuItem;
+    }
+    
+    public JMenuItem getColorBackgroundMenuItem() {
+        return colorBackgroundMenuItem;
     }
 
-    private void showFileInfo() {
-        String text = notesTextArea.getText();
-        long charCount = text.chars().count();
-        long wordCount = Pattern.compile("\\s+").splitAsStream(text).filter(word -> !word.isEmpty()).count();
-        long sentenceCount = Pattern.compile("[.!?]").splitAsStream(text).filter(sentence -> !sentence.isEmpty()).count();
+    public JMenuItem getScreenshotMenuItem() {
+        return screenshotMenuItem;
+    }
 
-        JOptionPane.showMessageDialog(this,
-                "Jumlah Karakter: " + charCount + "\n"
-                + "Jumlah Kata: " + wordCount + "\n"
-                + "Jumlah Kalimat: " + sentenceCount,
-                "Informasi File",
-                JOptionPane.INFORMATION_MESSAGE);
+    public JMenuItem getGoToLineMenuItem() {
+        return goToLineMenuItem;
     }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
-            @Override
             public void run() {
-                NotesAppGUI app = new NotesAppGUI();
-                app.setVisible(true);
+                new NotesAppGUI();
             }
         });
     }
